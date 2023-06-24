@@ -102,7 +102,32 @@ credits.drop_duplicates(subset='id', keep='first', inplace=True)  # Mantener la 
 credits.reset_index(drop=True, inplace=True)
 
 #---------------------------------------------------------------------------------------------------
+"""
+Se procede a crear un dataframe final haciendo un merge de ambos, siendo dataset movie principal.
+Aprovechamos de crear un archivo con los datos limpios y unidos
+"""
+# se normaliza el nombre clave en ambos dataframe
+movies = movies.rename(columns={'id': 'id_movie'})
+credits = credits.rename(columns={'id': 'id_movie'})
+
+#Unimos ambos dataset mediante id_movie
+data_final = movies.merge(credits, on='id_movie', how='left')
+# Exportamos el archivo ya limpio
+#data_final.to_csv('data_final.csv', index=False)
+#----------------------------------------------------------------------------------------------------
+
+"""
+Creamos un archivo con las columnas que necesitamos para los endpoints de nuestra API
+"""
+columnas_eliminar = ['tagline','status','spoken_languages','runtime','production_countries',
+                     'production_companies','overview','original_language','genres','belongs_to_collection',]
+
+data_endpoints = data_final.drop(columns=columnas_eliminar)
+# Se exporta un archivo con menos informacion para nuestra API
+#data_endpoints.to_csv('data_endpoints.csv', index=False)
 
 #-----------------------------------------------------------------------------------------------------
-print(movies.info())
-print(credits.info())
+#print(movies.info())
+#print(credits.info())
+print(data_final.info())
+print(data_endpoints.info())
