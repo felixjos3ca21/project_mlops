@@ -130,6 +130,15 @@ def votos_titulo(titulo: str):
 def get_actor(nombre_actor:str):
     '''Se ingresa el nombre de un actor que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
     Además, la cantidad de películas que en las que ha participado y el promedio de retorno'''
+    data_actor = pd.read_csv('C:\project_mlops\datasets\data_actor.csv')
+    actor_name = actor_name.lower().strip()
+    filtro_actor = data_actor[data_actor['name_actor'].apply(lambda x: any(d['name'].lower().strip() == actor_name for d in x) if isinstance(x, list) else False)]
+
+    nombre_actor = filtro_actor['name_actor'].apply(lambda x: [d['name'] for d in x]).tolist()
+    cantidad_filmaciones = len(filtro_actor)
+    retorno_total = filtro_actor['return'].sum()
+    retorno_promedio = filtro_actor['return'].mean()
     
-    
-    return {'actor':nombre_actor, 'cantidad_filmaciones':respuesta, 'retorno_total':respuesta, 'retorno_promedio':respuesta}
+    return {'actor': nombre_actor, 'cantidad_filmaciones': cantidad_filmaciones, 'retorno_total': retorno_total, 'retorno_promedio': retorno_promedio}
+
+#----------------------------------------------------------------------------------------------------------------------------------
