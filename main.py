@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 import pandas as pd
-
+import math
+import ast
+import json
+from fastapi.encoders import jsonable_encoder
 
 app = FastAPI()
 #--------------------------------------------
@@ -28,7 +31,7 @@ def cantidad_filmaciones_mes(mes:str):
     return {"cantidad" : cantidad , "mes": mes}
 
 # ------------------------------------------------------------------------------------------------------------- 
-@app.get('/cantidad_filmaciones_dia{dia}')
+@app.get('/cantidad_filmaciones_dia/{dia}')
 def cantidad_filmaciones_dia(dia: str):
     '''Se ingresa el día y la función retorna la cantidad de películas que se estrenaron ese día históricamente'''
     data = pd.read_csv('C:\project_mlops\datasets\data_endpoints.csv')
@@ -126,19 +129,72 @@ def votos_titulo(titulo: str):
       
     return {"resultados": resultados}
 #--------------------------------------------------------------------------------------------------------------------------------------
+def convertir_a_dict(valor):
+    datos_list = ast.literal_eval(valor)
+    datos_str_list = [json.dumps(d) for d in datos_list]
+    datos_dict_list = [json.loads(d) for d in datos_str_list]
+    return datos_dict_list
+
 @app.get('/get_actor/{nombre_actor}')
 def get_actor(nombre_actor:str):
     '''Se ingresa el nombre de un actor que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
     Además, la cantidad de películas que en las que ha participado y el promedio de retorno'''
     data_actor = pd.read_csv('C:\project_mlops\datasets\data_actor.csv')
-    actor_name = actor_name.lower().strip()
+    data_actor['name_actor'] = data_actor['name_actor'].apply(convertir_a_dict)
+    data_actor['return'] = data_actor['return'].astype(float).round(2)
+    
+    actor_name = nombre_actor.lower().strip()
     filtro_actor = data_actor[data_actor['name_actor'].apply(lambda x: any(d['name'].lower().strip() == actor_name for d in x) if isinstance(x, list) else False)]
-
-    nombre_actor = filtro_actor['name_actor'].apply(lambda x: [d['name'] for d in x]).tolist()
     cantidad_filmaciones = len(filtro_actor)
     retorno_total = filtro_actor['return'].sum()
     retorno_promedio = filtro_actor['return'].mean()
+
+    if isinstance(retorno_promedio, str):
+        retorno_promedio = float(retorno_promedio)
     
-    return {'actor': nombre_actor, 'cantidad_filmaciones': cantidad_filmaciones, 'retorno_total': retorno_total, 'retorno_promedio': retorno_promedio}
+    if math.isinf(retorno_promedio):
+        retorno_promedio = 'Infinity'
+
+    retorno_total = round(retorno_total, 2)
+    retorno_promedio = round(retorno_promedio, 2)
+    response_data = {
+        'actor': nombre_actor,
+        'cantidad_filmaciones': cantidad_filmaciones,
+        'retorno_total': retorno_total,
+        'retorno_promedio': retorno_promedio
+    }
+
+    json_compatible_data = jsonable_encoder(response_data)
+
+    return json_compatible_data   
 
 #----------------------------------------------------------------------------------------------------------------------------------
+@app.get('/get_director/{nombre_director}')
+def get_director(nombre_director:str):
+    ''' Se ingresa el nombre de un director que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
+    Además, deberá devolver el nombre de cada película con la fecha de lanzamiento, retorno individual, costo y ganancia de la misma.'''
+    data_director = pd.read_csv('C:\project_mlops\datasets\data_director.csv')
+    #Transformar la columna 'name_director' en una lista de diccionarios
+    data_director['name_director'] = data_director['name_director'].apply(convertir_a_dict)
+    nombre_director = nombre_director.lower().strip()
+    filtro_director = data_director[data_director['name_director'].apply(lambda x: any(d['name'].lower().strip() == nombre_director for d in x) if isinstance(x, list) else False)]
+    
+    nombre_director = nombre_director
+    retorno_total_director = filtro_director['return'].sum()
+    
+    peliculas = []
+    for d, row in filtro_director.iterrows():
+        pelicula = {
+            'titulo': row['title'],
+            'anio': row['release_date'],
+            'retorno_pelicula': row['return'],
+            'budget_pelicula': row['budget'],
+            'revenue_pelicula': row['revenue']
+        }
+        peliculas.append(pelicula)
+
+    return {
+        'director': nombre_director,
+        'retorno_total_director': retorno_total_director,
+        'peliculas': peliculas
+    }
