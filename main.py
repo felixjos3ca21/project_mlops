@@ -4,6 +4,10 @@ import math
 import ast
 import json
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neighbors import NearestNeighbors
 
 app = FastAPI()
 #--------------------------------------------
@@ -198,3 +202,60 @@ def get_director(nombre_director:str):
         'retorno_total_director': retorno_total_director,
         'peliculas': peliculas
     }
+    
+ #----------------------------------------------------------------------------------------------------------------------------------
+    
+    # ML
+# Compilar la expresión regular fuera de la función
+regex = re.compile(r'[^a-zA-Z]')
+
+@app.get('/recomendacion/{titulo}')
+def recomendacion(title:str, modelo=knn_model, regex=regex):
+    try:
+        '''Ingresas un nombre de pelicula y te recomienda las similares en una lista'''
+        data_ml = pd.read_csv('C:\project_mlops\datasets\data_ML.csv')
+        
+        vectorizer = TfidfVectorizer(stop_words='english')
+        vectorized_data = vectorizer.fit_transform(data_ml['combined_text'])
+        
+        # Crear y ajustar el modelo KNN fuera de la función
+        knn = NearestNeighbors(metric='cosine', algorithm='brute')
+        knn.fit(vectorized_data)
+        
+        # Preprocesamiento del título
+        processed_title = re.sub(r'[^a-zA-Z]', ' ', title.lower())
+        
+        # Obtener índice de la película de consulta
+        try:
+            index = data_ml[data_ml['title'].str.lower() == processed_title].index[0]
+        except IndexError:
+            raise HTTPException(status_code=404, detail="Título de película no encontrado")
+        
+        # Numero de recomendaciones
+        num_recomen = 5
+        
+        # Obtener recomendaciones basadas en el índice de consulta
+        _, indices = knn.kneighbors(vectorized_data[index], n_neighbors=num_recomen+1)
+        
+        # Obtener índices de las películas recomendadas
+        index_title = indices.flatten()[1:]
+        
+        # Devolver una estructura de diccionario con los títulos recomendados
+        result = {'lista recomendada': [title.title() for title in data_ml['title'].iloc[index_title].tolist()]}
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
