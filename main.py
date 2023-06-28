@@ -139,7 +139,7 @@ def votos_titulo(titulo: str):
 def get_actor(nombre_actor:str):
     '''Se ingresa el nombre de un actor que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
     Además, la cantidad de películas que en las que ha participado y el promedio de retorno'''
-    data_actor = pd.read_csv('C:\project_mlops\data_actor.csv')
+    data_actor = pd.read_csv('data_actor.csv')
     data_actor['return'] = data_actor['return'].astype(float).round(2)
     
     
