@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 import pandas as pd
 import math
-import ast
+import numpy as np
+from typing import List
 import json
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
@@ -133,39 +134,33 @@ def votos_titulo(titulo: str):
       
     return {"resultados": resultados}
 #--------------------------------------------------------------------------------------------------------------------------------------
-def convertir_a_dict(valor):
-    datos_list = ast.literal_eval(valor)
-    datos_str_list = [json.dumps(d) for d in datos_list]
-    datos_dict_list = [json.loads(d) for d in datos_str_list]
-    return datos_dict_list
 
 @app.get('/get_actor/{nombre_actor}')
 def get_actor(nombre_actor:str):
     '''Se ingresa el nombre de un actor que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
     Además, la cantidad de películas que en las que ha participado y el promedio de retorno'''
-    data_actor = pd.read_csv('data_actor.csv')
-    data_actor['name_actor'] = data_actor['name_actor'].apply(convertir_a_dict)
+    data_actor = pd.read_csv('C:\project_mlops\data_actor.csv')
     data_actor['return'] = data_actor['return'].astype(float).round(2)
     
+    
     actor_name = nombre_actor.lower().strip()
-    filtro_actor = data_actor[data_actor['name_actor'].apply(lambda x: any(d['name'].lower().strip() == actor_name for d in x) if isinstance(x, list) else False)]
+    filtro_actor = data_actor[data_actor['name_actor'].str.lower().str.contains(actor_name)]
     cantidad_filmaciones = len(filtro_actor)
     retorno_total = filtro_actor['return'].sum()
-    retorno_promedio = filtro_actor['return'].mean()
+    retorno_promedio =  filtro_actor['return'].mean()
 
-    if isinstance(retorno_promedio, str):
-        retorno_promedio = float(retorno_promedio)
-    
     if math.isinf(retorno_promedio):
         retorno_promedio = 'Infinity'
+    else:
+        retorno_promedio = round(retorno_promedio, 2)
 
     retorno_total = round(retorno_total, 2)
     retorno_promedio = round(retorno_promedio, 2)
     response_data = {
         'actor': nombre_actor,
         'cantidad_filmaciones': cantidad_filmaciones,
-        'retorno_total': retorno_total,
-        'retorno_promedio': retorno_promedio
+        'retorno_total': str(round(retorno_total, 2)),
+        'retorno_promedio': str(retorno_promedio)
     }
 
     json_compatible_data = jsonable_encoder(response_data)
@@ -173,6 +168,11 @@ def get_actor(nombre_actor:str):
     return json_compatible_data   
 
 #----------------------------------------------------------------------------------------------------------------------------------
+def convertir_a_dict(valor):
+    datos_list = ast.literal_eval(valor)
+    datos_str_list = [json.dumps(d) for d in datos_list]
+    datos_dict_list = [json.loads(d) for d in datos_str_list]
+    return datos_dict_list
 @app.get('/get_director/{nombre_director}')
 def get_director(nombre_director:str):
     ''' Se ingresa el nombre de un director que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
