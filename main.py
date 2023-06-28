@@ -2,8 +2,6 @@ from fastapi import FastAPI
 import pandas as pd
 import math
 import numpy as np
-from typing import List
-import json
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 import re
@@ -168,21 +166,15 @@ def get_actor(nombre_actor:str):
     return json_compatible_data   
 
 #----------------------------------------------------------------------------------------------------------------------------------
-def convertir_a_dict(valor):
-    datos_list = ast.literal_eval(valor)
-    datos_str_list = [json.dumps(d) for d in datos_list]
-    datos_dict_list = [json.loads(d) for d in datos_str_list]
-    return datos_dict_list
+
 @app.get('/get_director/{nombre_director}')
 def get_director(nombre_director:str):
     ''' Se ingresa el nombre de un director que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
     Además, deberá devolver el nombre de cada película con la fecha de lanzamiento, retorno individual, costo y ganancia de la misma.'''
     data_director = pd.read_csv('data_director.csv')
-    #Transformar la columna 'name_director' en una lista de diccionarios
-    data_director['name_director'] = data_director['name_director'].apply(convertir_a_dict)
-    nombre_director = nombre_director.lower().strip()
-    filtro_director = data_director[data_director['name_director'].apply(lambda x: any(d['name'].lower().strip() == nombre_director for d in x) if isinstance(x, list) else False)]
     
+    nombre_director = nombre_director.lower().strip()
+    filtro_director = data_director[data_director['name_director'].str.lower().str.contains(nombre_director)]
     nombre_director = nombre_director
     retorno_total_director = filtro_director['return'].sum()
     
@@ -198,7 +190,7 @@ def get_director(nombre_director:str):
         peliculas.append(pelicula)
 
     return {
-        'director': nombre_director,
+        'director': nombre_director.title(),
         'retorno_total_director': retorno_total_director,
         'peliculas': peliculas
     }
