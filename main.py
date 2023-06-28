@@ -208,11 +208,13 @@ def get_director(nombre_director:str):
     # ML
 # Compilar la expresión regular fuera de la función
 regex = re.compile(r'[^a-zA-Z]')
-data_ml = pd.read_csv('C:\project_mlops\datasets\data_ML.csv')
 @app.get('/recomendacion/{titulo}')
 def recomendacion(title:str):
     try:
         '''Ingresas un nombre de película y te recomienda las similares en una lista'''
+        data_ml = pd.read_csv('C:\project_mlops\datasets\data_ML.csv')
+        # Compilar la expresión regular fuera de la función
+        
         # Crear un objeto TfidfVectorizer para convertir el texto en vectores TF-IDF
         vectorizer = TfidfVectorizer(stop_words='english')
         # Aplicar el vectorizador a los datos de texto combinados y obtener la matriz de vectores TF-IDF
@@ -221,6 +223,7 @@ def recomendacion(title:str):
         # Crear y ajustar el modelo KNN fuera de la función
         knn_model = NearestNeighbors(metric='cosine', algorithm='brute')
         knn_model.fit(vectorized_data)
+        
         
         # Preprocesamiento del título
         processed_title = re.sub(r'[^a-zA-Z]', ' ', title.lower())
