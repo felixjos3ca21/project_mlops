@@ -20,7 +20,7 @@ def index():
 @app.get("/cantidad_filmaciones_mes/{mes}")
 def cantidad_filmaciones_mes(mes:str):
     '''Se ingresa el mes y la funcion retorna la cantidad de peliculas que se estrenaron ese mes historicamente'''
-    data = pd.read_csv('C:\project_mlops\datasets\data_endpoints.csv')
+    data = pd.read_csv('C:\project_mlops\datasets\data_mes.csv')
     data["release_date"] = pd.to_datetime(data["release_date"])
     mes = mes.lower()
     # Verificar si el mes es válido
@@ -38,7 +38,7 @@ def cantidad_filmaciones_mes(mes:str):
 @app.get('/cantidad_filmaciones_dia/{dia}')
 def cantidad_filmaciones_dia(dia: str):
     '''Se ingresa el día y la función retorna la cantidad de películas que se estrenaron ese día históricamente'''
-    data = pd.read_csv('C:\project_mlops\datasets\data_endpoints.csv')
+    data = pd.read_csv('C:\project_mlops\datasets\data_dia.csv')
     data["release_date"] = pd.to_datetime(data["release_date"])
     # Convertir el día a minúsculas
     dia = dia.lower()
@@ -62,7 +62,7 @@ def cantidad_filmaciones_dia(dia: str):
 @app.get('/score_titulo/{titulo}')
 def score_titulo(titulo: str):
     '''Se ingresa el título de una filmación esperando como respuesta el título, el año de estreno y el score'''
-    data = pd.read_csv('C:\project_mlops\datasets\data_endpoints.csv')
+    data = pd.read_csv('C:\project_mlops\datasets\data_score.csv')
     # Tratamiento previo
     titulo = titulo.lower()
     data['release_year'] = pd.to_datetime(data['release_date']).dt.year
@@ -101,7 +101,7 @@ def votos_titulo(titulo: str):
     '''Se ingresa el título de una filmación esperando como respuesta el título, la cantidad de votos y el valor promedio de las votaciones. 
     La misma variable deberá de contar con al menos 2000 valoraciones, 
     caso contrario, debemos contar con un mensaje avisando que no cumple esta condición y que por ende, no se devuelve ningún valor.'''
-    data = pd.read_csv('C:\project_mlops\datasets\data_endpoints.csv')
+    data = pd.read_csv('C:\project_mlops\datasets\data_vote.csv')
     
     # Tratamiento previo
     titulo = titulo.lower()
@@ -208,19 +208,19 @@ def get_director(nombre_director:str):
     # ML
 # Compilar la expresión regular fuera de la función
 regex = re.compile(r'[^a-zA-Z]')
-
+data_ml = pd.read_csv('C:\project_mlops\datasets\data_ML.csv')
 @app.get('/recomendacion/{titulo}')
-def recomendacion(title:str, modelo=knn_model, regex=regex):
+def recomendacion(title:str):
     try:
-        '''Ingresas un nombre de pelicula y te recomienda las similares en una lista'''
-        data_ml = pd.read_csv('C:\project_mlops\datasets\data_ML.csv')
-        
+        '''Ingresas un nombre de película y te recomienda las similares en una lista'''
+        # Crear un objeto TfidfVectorizer para convertir el texto en vectores TF-IDF
         vectorizer = TfidfVectorizer(stop_words='english')
+        # Aplicar el vectorizador a los datos de texto combinados y obtener la matriz de vectores TF-IDF
         vectorized_data = vectorizer.fit_transform(data_ml['combined_text'])
         
         # Crear y ajustar el modelo KNN fuera de la función
-        knn = NearestNeighbors(metric='cosine', algorithm='brute')
-        knn.fit(vectorized_data)
+        knn_model = NearestNeighbors(metric='cosine', algorithm='brute')
+        knn_model.fit(vectorized_data)
         
         # Preprocesamiento del título
         processed_title = re.sub(r'[^a-zA-Z]', ' ', title.lower())
@@ -234,8 +234,8 @@ def recomendacion(title:str, modelo=knn_model, regex=regex):
         # Numero de recomendaciones
         num_recomen = 5
         
-        # Obtener recomendaciones basadas en el índice de consulta
-        _, indices = knn.kneighbors(vectorized_data[index], n_neighbors=num_recomen+1)
+        # Obtener recomendaciones basadas en el índice de consulta, menos el titulo que se ingresa
+        _, indices = knn_model.kneighbors(vectorized_data[index], n_neighbors=num_recomen+1)
         
         # Obtener índices de las películas recomendadas
         index_title = indices.flatten()[1:]
