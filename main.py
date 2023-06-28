@@ -20,7 +20,7 @@ def index():
 @app.get("/cantidad_filmaciones_mes/{mes}")
 def cantidad_filmaciones_mes(mes:str):
     '''Se ingresa el mes y la funcion retorna la cantidad de peliculas que se estrenaron ese mes historicamente'''
-    data = pd.read_csv('datasets\data_mes.csv')
+    data = pd.read_csv('data_mes.csv')
     data["release_date"] = pd.to_datetime(data["release_date"])
     mes = mes.lower()
     # Verificar si el mes es válido
@@ -38,7 +38,7 @@ def cantidad_filmaciones_mes(mes:str):
 @app.get('/cantidad_filmaciones_dia/{dia}')
 def cantidad_filmaciones_dia(dia: str):
     '''Se ingresa el día y la función retorna la cantidad de películas que se estrenaron ese día históricamente'''
-    data = pd.read_csv('datasets\data_dia.csv')
+    data = pd.read_csv('data_dia.csv')
     data["release_date"] = pd.to_datetime(data["release_date"])
     # Convertir el día a minúsculas
     dia = dia.lower()
@@ -62,7 +62,7 @@ def cantidad_filmaciones_dia(dia: str):
 @app.get('/score_titulo/{titulo}')
 def score_titulo(titulo: str):
     '''Se ingresa el título de una filmación esperando como respuesta el título, el año de estreno y el score'''
-    data = pd.read_csv('datasets\data_score.csv')
+    data = pd.read_csv('data_score.csv')
     # Tratamiento previo
     titulo = titulo.lower()
     data['release_year'] = pd.to_datetime(data['release_date']).dt.year
@@ -101,7 +101,7 @@ def votos_titulo(titulo: str):
     '''Se ingresa el título de una filmación esperando como respuesta el título, la cantidad de votos y el valor promedio de las votaciones. 
     La misma variable deberá de contar con al menos 2000 valoraciones, 
     caso contrario, debemos contar con un mensaje avisando que no cumple esta condición y que por ende, no se devuelve ningún valor.'''
-    data = pd.read_csv('datasets\data_vote.csv')
+    data = pd.read_csv('data_vote.csv')
     
     # Tratamiento previo
     titulo = titulo.lower()
@@ -143,7 +143,7 @@ def convertir_a_dict(valor):
 def get_actor(nombre_actor:str):
     '''Se ingresa el nombre de un actor que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
     Además, la cantidad de películas que en las que ha participado y el promedio de retorno'''
-    data_actor = pd.read_csv('datasets\data_actor.csv')
+    data_actor = pd.read_csv('data_actor.csv')
     data_actor['name_actor'] = data_actor['name_actor'].apply(convertir_a_dict)
     data_actor['return'] = data_actor['return'].astype(float).round(2)
     
@@ -177,7 +177,7 @@ def get_actor(nombre_actor:str):
 def get_director(nombre_director:str):
     ''' Se ingresa el nombre de un director que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. 
     Además, deberá devolver el nombre de cada película con la fecha de lanzamiento, retorno individual, costo y ganancia de la misma.'''
-    data_director = pd.read_csv('datasets\data_director.csv')
+    data_director = pd.read_csv('data_director.csv')
     #Transformar la columna 'name_director' en una lista de diccionarios
     data_director['name_director'] = data_director['name_director'].apply(convertir_a_dict)
     nombre_director = nombre_director.lower().strip()
@@ -212,7 +212,7 @@ regex = re.compile(r'[^a-zA-Z]')
 def recomendacion(title:str):
     try:
         '''Ingresas un nombre de película y te recomienda las similares en una lista'''
-        data_ml = pd.read_csv('datasets\data_ML.csv')
+        data_ml = pd.read_csv('data_ML.csv')
         # Compilar la expresión regular fuera de la función
         
         # Crear un objeto TfidfVectorizer para convertir el texto en vectores TF-IDF
