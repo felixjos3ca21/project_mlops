@@ -8,24 +8,18 @@
 <img src="https://user-images.githubusercontent.com/67664604/217914153-1eb00e25-ac08-4dfa-aaf8-53c09038f082.png"  height=300>
 </p>
 
+## Contenido
 
-**Contenido**
-
-[TOCM]
-
-[TOC]
-
-#Contexto
-##H2 header
-###H3 header
-####H4 header
-#####H5 header
-######H6 header
-
+- [Descripción del problema](#descripción-del-problema)
+- [ETL](#etl)
+- [Implementación de la API](#implementación-de-la-api)
+- [Exploración de los datos (EDA)](#exploración-de-los-datos-eda)
+- [Despliegue de la API](#despliegue-de-la-api)
+- [Sistema de Recomendación de Películas](#sistema-de-recomendación-de-películas)
 
 <hr>  
 
-## **Descripción del problema (Contexto y rol a desarrollar)**
+## Descripción del problema
 
 ## Contexto
 
@@ -42,9 +36,8 @@ Al adentrarme en los datos existentes, me he dado cuenta de que su calidad es de
 
 <hr>  
 
-
 ## ETL
-# **Propuesta de trabajo**
+## **Propuesta de trabajo**
 
 **`Transformaciones`**:  Para este MVP no necesitas perfección, ¡necesitas rapidez! ⏩ Vas a hacer estas, ***y solo estas***, transformaciones a los datos:
 
@@ -62,7 +55,7 @@ Al adentrarme en los datos existentes, me he dado cuenta de que su calidad es de
 
 <hr>  
 
-## **Implementacion de la API**
+## Implementación de la API
 <br/>
 
 **`Desarrollo API`**:   Propones disponibilizar los datos de la empresa usando el framework ***FastAPI***. Las consultas que propones son las siguientes:
@@ -101,26 +94,49 @@ Deben crear 6 funciones para los endpoints que se consumirán en la API, recuerd
 
 <hr> 
 
-# **Análisis exploratorio de los datos**: _(Exploratory Data Analysis-EDA)_
+## Exploración de los datos (EDA): _(Exploratory Data Analysis-EDA)_
 
-Ya los datos están limpios, ahora es tiempo de investigar las relaciones que hay entre las variables de los datasets, ver si hay outliers o anomalías (que no tienen que ser errores necesariamente :eyes: ), y ver si hay algún patrón interesante que valga la pena explorar en un análisis posterior. Las nubes de palabras dan una buena idea de cuáles palabras son más frecuentes en los títulos, ¡podría ayudar al sistema de recomendación! Sabes que puedes apoyarte en librerías como _pandas profiling, missingno, sweetviz, autoviz_, entre otros y sacar de allí tus conclusiones 😉
+Después de realizar la limpieza de los datos, me dediqué a explorar las relaciones entre las variables de nuestros conjuntos de datos. Durante este proceso, también busqué posibles valores atípicos o anomalías que podrían resultar interesantes para nuestro análisis, recordando que no todos los datos anómalos son necesariamente errores. Además, estuve atento(a) a la identificación de patrones interesantes que merecieran una exploración más profunda en etapas posteriores.
+
+Para obtener una mejor comprensión de las palabras más frecuentes en los títulos y su posible contribución a nuestro sistema de recomendación, utilicé varias bibliotecas. Utilicé pandas para el análisis y manipulación de los datos, matplotlib.pyplot para generar visualizaciones, sklearn.feature_extraction.text.TfidfVectorizer para extraer características de texto y wordcloud.WordCloud para crear nubes de palabras impactantes.
+
+Estas bibliotecas fueron herramientas valiosas que me permitieron obtener conclusiones significativas sobre nuestros datos. Los gráficos y las nubes de palabras generadas me proporcionaron una visión clara de las palabras más frecuentes y resaltaron los términos clave en los títulos, lo cual puede ser de gran ayuda para nuestro sistema de recomendación.
+
+A lo largo de este proceso de análisis exploratorio, descubrí información relevante que podría influir en el rendimiento y la efectividad de nuestro sistema de recomendación. Estoy emocionado(a) de compartir estos hallazgos y utilizarlos para impulsar nuestro proyecto hacia adelante.
+<hr> 
+
+## Despliegue de la API
+<br/>
+
+Para poner en marcha nuestro sistema de recomendación de películas, hemos utilizado la plataforma Render para el despliegue de la API. La API está accesible a través del siguiente enlace: [https://project-mlops.onrender.com](https://project-mlops.onrender.com).
+
+Una de las ventajas clave de Render es su facilidad de uso y su capacidad para escalar de manera eficiente. Render se encarga de manejar la infraestructura subyacente y proporciona una plataforma estable y confiable para alojar nuestra API de recomendación de películas.
+
+Al acceder al enlace de la API, puedes realizar consultas agregando `/docs` al final de la URL. Esto te dirigirá a una interfaz interactiva donde podrás explorar y utilizar los diferentes endpoints disponibles para interactuar con el sistema de recomendación. Desde esta interfaz, podrás ingresar el título de una película y obtener recomendaciones personalizadas.
+
+Render también nos brinda características adicionales, como la capacidad de implementar actualizaciones continuas y automáticas a medida que se agregan nuevos datos y mejoras al modelo. Esto garantiza que nuestro sistema de recomendación esté siempre actualizado y en sintonía con las últimas tendencias y preferencias de los usuarios.
+
+Confiamos en que la combinación de Render como plataforma de despliegue y nuestra potente API de recomendación de películas brinde una experiencia fluida y atractiva para los usuarios, ofreciendo recomendaciones precisas y relevantes.
+
+
+<br/>
 
 
 <hr> 
 
-# **Sistema de recomendación:**
+## Sistema de Recomendación de Películas
 
-Una vez que toda la data es consumible por la API, está lista para consumir por los departamentos de Analytics y Machine Learning, y nuestro EDA nos permite entender bien los datos a los que tenemos acceso, es hora de entrenar nuestro modelo de machine learning para armar un sistema de recomendación de películas. El EDA debería incluir gráficas interesantes para extraer datos, como por ejemplo una nube de palabras con las palabras más frecuentes en los títulos de las películas. Éste consiste en recomendar películas a los usuarios basándose en películas similares, por lo que se debe encontrar la similitud de puntuación entre esa película y el resto de películas, se ordenarán según el score de similaridad y devolverá una lista de Python con 5 valores, cada uno siendo el string del nombre de las películas con mayor puntaje, en orden descendente. Debe ser deployado como una función adicional de la API anterior y debe llamarse:
+Una vez que todos los datos sean consumibles a través de la API y estén listos para ser utilizados por los departamentos de Analytics y Machine Learning, es el momento de entrenar nuestro modelo de machine learning y desarrollar un sistema de recomendación de películas.
 
+El sistema de recomendación se basa en encontrar películas similares a partir de una película de consulta dada. Para lograr esto, utilizamos el algoritmo Nearest Neighbors, que encuentra las películas más similares en función de la similitud de puntuación. Las películas se ordenan según su score de similaridad y se devuelve una lista de las 5 películas más relevantes en orden descendente.
 
-+ def **recomendacion( *`titulo`* )**:
-    Se ingresa el nombre de una película y te recomienda las similares en una lista de 5 valores.
+Este algoritmo, junto con el preprocesamiento de los datos, se implementa en la función recomendacion(titulo). Simplemente ingresas el título de una película y obtendrás una lista de las 5 películas más recomendadas.
+
+Los datos se procesaron previamente utilizando el TfidfVectorizer y el NearestNeighbors. Se eliminan caracteres no deseados, se convierte el texto a minúsculas y se eliminan las palabras vacías (stop words) para obtener una representación numérica de las películas.
+
+Para utilizar este sistema de recomendación, asegúrate de que la API esté desplegada correctamente y llama a la función recomendacion(titulo) con el título de la película de consulta. Obtendrás una lista de las películas más relevantes para sugerir a los usuarios.
+
+¡Explora y disfruta de las recomendaciones personalizadas que ofrece nuestro sistema de recomendación de películas!
 
 <br/>
 
-<br/>
-
-
-**`Deployment`**: Conoces sobre Render 
-
-<br/>
